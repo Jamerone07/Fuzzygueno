@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Test - Fuzzygueño</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        h1 { color: #333; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🔍 Server Connection Test</h1>
+        
+        <div id="protocol-check"></div>
+        <div id="php-check"></div>
+        
+        <h2>Test PHP Backend</h2>
+        <button onclick="testPHP()">Test sendOrder.php</button>
+        <div id="php-result" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>📋 Quick Setup Instructions</h2>
+        <div class="info">
+            <h3>If you see errors above:</h3>
+            <ol>
+                <li><strong>Install XAMPP</strong> (includes PHP + Apache)
+                    <ul>
+                        <li>Download: <a href="https://www.apachefriends.org/" target="_blank">https://www.apachefriends.org/</a></li>
+                        <li>Copy project to: <code>C:\xampp\htdocs\fuzzygueno\</code></li>
+                        <li>Start Apache from XAMPP Control Panel</li>
+                        <li>Access: <code>http://localhost/fuzzygueno/</code></li>
+                    </ul>
+                </li>
+                <li><strong>OR Install PHP Standalone</strong>
+                    <ul>
+                        <li>Download: <a href="https://windows.php.net/download/" target="_blank">https://windows.php.net/download/</a></li>
+                        <li>Extract to <code>C:\php\</code></li>
+                        <li>Add to PATH, then run: <code>php -S localhost:8000</code></li>
+                    </ul>
+                </li>
+            </ol>
+            <p><strong>Important:</strong> Always access via <code>http://localhost</code> NOT <code>file:///</code></p>
+        </div>
+    </div>
+
+    <script>
+        // Check protocol
+        const protocol = window.location.protocol;
+        const protocolCheck = document.getElementById('protocol-check');
+        
+        if (protocol === 'file:') {
+            protocolCheck.innerHTML = `
+                <div class="error">
+                    <strong>❌ Wrong Protocol!</strong><br>
+                    You're accessing via <code>file://</code> which won't work.<br>
+                    You need to use a web server (http://localhost).<br>
+                    See instructions below.
+                </div>
+            `;
+        } else if (protocol === 'http:' || protocol === 'https:') {
+            protocolCheck.innerHTML = `
+                <div class="success">
+                    <strong>✅ Correct Protocol!</strong><br>
+                    You're accessing via <code>${protocol}</code> - this is correct!
+                </div>
+            `;
+        }
+
+        // Test PHP backend
+        async function testPHP() {
+            const resultDiv = document.getElementById('php-result');
+            resultDiv.innerHTML = '<div class="info">Testing...</div>';
+            
+            try {
+                const response = await fetch('sendOrder.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'name': 'Test User',
+                        'contact': 'test@example.com',
+                        'product-type': 'keychains',
+                        'colors-design': 'Test design',
+                        'quantity': '1',
+                        'message': 'This is a test'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' || data.status === 'error') {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ PHP Backend is Working!</strong><br>
+                            Response: ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>⚠️ Unexpected Response</strong><br>
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ PHP Backend Not Accessible</strong><br>
+                        Error: ${error.message}<br><br>
+                        <strong>Possible issues:</strong>
+                        <ul>
+                            <li>PHP is not installed or not running</li>
+                            <li>Server is not configured correctly</li>
+                            <li>sendOrder.php file is missing</li>
+                            <li>You're still accessing via file://</li>
+                        </ul>
+                        <p>See setup instructions above.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check PHP on load if protocol is correct
+        if (protocol === 'http:' || protocol === 'https:') {
+            setTimeout(() => {
+                const phpCheck = document.getElementById('php-check');
+                fetch('sendOrder.php')
+                    .then(() => {
+                        phpCheck.innerHTML = `
+                            <div class="success">
+                                ✅ PHP file is accessible
+                            </div>
+                        `;
+                    })
+                    .catch(() => {
+                        phpCheck.innerHTML = `
+                            <div class="error">
+                                ❌ PHP file not found or server not running
+                            </div>
+                        `;
+                    });
+            }, 500);
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,14 @@
+{
+    "name": "fuzzygueno/website",
+    "description": "Fuzzygueño - Fuzzywires & Custom Handmade Gifts Website",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fuzzygueno\\": "src/"
+        }
+    }
+}
+

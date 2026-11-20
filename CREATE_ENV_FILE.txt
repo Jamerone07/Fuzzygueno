@@ -1,0 +1,14 @@
+IMPORTANT: Create .env file manually
+
+1. Create a new file named ".env" (with the dot at the beginning) in your TECNO folder
+2. Copy and paste this content into the .env file:
+
+MAIL_HOST=smtp.gmail.com
+MAIL_USERNAME=madijamerone@gmail.com
+MAIL_PASSWORD=vwinwvucqxfxzmwd
+
+3. Save the file
+4. Make sure the file is in: D:\TECNP\TECNO\.env
+
+Note: The .env file might be hidden. Make sure to show hidden files in Windows Explorer.
+
